@@ -5,9 +5,8 @@ import os
 
 from flask_cors import CORS
 
-CORS(app, origins=["https://jamesinjic.onrender.com"], supports_credentials=True)
-
 app = Flask(__name__)
+CORS(app, origins=["https://jamesinjic.onrender.com"], supports_credentials=True)
 
 STATIC_FOLDER = "static"
 os.makedirs(STATIC_FOLDER, exist_ok=True)
