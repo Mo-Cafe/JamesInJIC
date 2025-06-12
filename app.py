@@ -1,31 +1,28 @@
-from flask import Flask, render_template, request
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 from gtts import gTTS
 from datetime import datetime
 import os
 
-from flask_cors import CORS
-
-app = Flask(__name__)
+app = Flask(__name__)  # ✅ 먼저 선언
 CORS(app, origins=["https://jamesinjic.onrender.com"], supports_credentials=True)
 
-STATIC_FOLDER = "static"
-os.makedirs(STATIC_FOLDER, exist_ok=True)
+@app.route('/api/say', methods=['POST'])
+def say():
+    data = request.get_json()
+    text = data.get('text', '').strip()
+    if not text:
+        return jsonify({'error': 'No text provided'}), 400
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    audio_file = None
+    filename = f"speech_{int(datetime.now().timestamp())}.mp3"
+    filepath = os.path.join("static", filename)
 
-    if request.method == 'POST':
-        text = request.form.get('text', '').strip()
-        if text:
-            filename = f"speech_{int(datetime.now().timestamp())}.mp3"
-            filepath = os.path.join(STATIC_FOLDER, filename)
-
-            tts = gTTS(text, lang='en')
-            tts.save(filepath)
-            audio_file = filename
-
-    return render_template('index.html', audio_file=audio_file)
+    try:
+        tts = gTTS(text, lang='en')
+        tts.save(filepath)
+        return jsonify({'audio_url': f"/static/{filename}"})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
