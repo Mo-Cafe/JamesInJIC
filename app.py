@@ -5,7 +5,7 @@ from datetime import datetime
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # 모든 출처 허용 (개발용)
+CORS(app, origins=["https://jamesinjic.onrender.com"])
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
