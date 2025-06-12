@@ -3,6 +3,10 @@ from gtts import gTTS
 from datetime import datetime
 import os
 
+from flask_cors import CORS
+
+CORS(app, origins=["https://jamesinjic.onrender.com"], supports_credentials=True)
+
 app = Flask(__name__)
 
 STATIC_FOLDER = "static"
