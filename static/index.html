@@ -68,8 +68,8 @@
   </style>
 </head>
 <body>
-  <!-- 로고 이미지 (클릭 시 입력 초기화) -->
-  <img src="/static/logo.png" alt="Logo" class="logo" onclick="resetAll()">
+  <!-- 로고 이미지 (클릭 시 입력 초기화 & 이스터에그) -->
+  <img src="/static/logo.png" alt="Logo" id="logo" class="logo" onclick="resetAll()">
 
   <h1>How do you pronounce this?</h1>
 
@@ -85,42 +85,59 @@
   </footer>
 
   <script>
+    let clickCount = 0;
+    let isEasterEggActivated = false;
+
     async function speakText() {
-  const text = document.getElementById("textInput").value.trim();
-  if (!text) return alert("Please enter some text.");
+      const text = document.getElementById("textInput").value.trim();
+      if (!text) return alert("Please enter some text.");
 
-  try {
-    const response = await fetch('https://jamesinjic.onrender.com/api/say', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
-    });
+      // 클릭 카운트 초기화
+      clickCount = 0;
+      if (isEasterEggActivated) {
+        // 이스터에그 해제 안 함 (한 번 발동되면 유지됨)
+      }
 
-    if (!response.ok) {
-      const errorText = await response.text(); // HTML 에러를 방지
-      throw new Error("Server Error: " + errorText.slice(0, 100));
+      try {
+        const response = await fetch('https://jamesinjic.onrender.com/api/say', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error("Server Error: " + errorText.slice(0, 100));
+        }
+
+        const data = await response.json();
+        if (data.audio_url) {
+          document.getElementById("player").innerHTML = `
+            <audio controls autoplay>
+              <source src="https://jamesinjic.onrender.com${data.audio_url}" type="audio/mpeg">
+              Your browser does not support the audio element.
+            </audio>
+          `;
+        } else {
+          alert("Error: " + (data.error || "unknown"));
+        }
+      } catch (err) {
+        console.error("Fetch failed:", err);
+        alert("Failed to contact server.\n" + err.message);
+      }
     }
-
-    const data = await response.json();
-    if (data.audio_url) {
-      document.getElementById("player").innerHTML = `
-        <audio controls autoplay>
-          <source src="https://jamesinjic.onrender.com${data.audio_url}" type="audio/mpeg">
-          Your browser does not support the audio element.
-        </audio>
-      `;
-    } else {
-      alert("Error: " + (data.error || "unknown"));
-    }
-  } catch (err) {
-    console.error("Fetch failed:", err);
-    alert("Failed to contact server.\n" + err.message);
-  }
-}
 
     function resetAll() {
       document.getElementById("textInput").value = "";
       document.getElementById("player").innerHTML = "";
+
+      if (isEasterEggActivated) return; // 바뀐 이미지 상태에서는 카운트 안 함
+
+      clickCount++;
+      if (clickCount >= 10) {
+        document.getElementById("logo").src = "/static/gary.jpg";
+        isEasterEggActivated = true;
+      }
     }
 
     function handleEnter(event) {
