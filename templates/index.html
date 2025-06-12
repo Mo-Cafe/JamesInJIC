@@ -86,27 +86,37 @@
 
   <script>
     async function speakText() {
-      const text = document.getElementById("textInput").value.trim();
-      if (!text) return alert("Please enter some text.");
+  const text = document.getElementById("textInput").value.trim();
+  if (!text) return alert("Please enter some text.");
 
-      const response = await fetch('https://jamesinjic.onrender.com/api/say', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-      });
+  try {
+    const response = await fetch('https://jamesinjic.onrender.com/api/say', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
 
-      const data = await response.json();
-      if (data.audio_url) {
-        document.getElementById("player").innerHTML = `
-          <audio controls autoplay>
-            <source src="https://jamesinjic.onrender.com${data.audio_url}" type="audio/mpeg">
-            Your browser does not support the audio element.
-          </audio>
-        `;
-      } else {
-        alert("Error: " + (data.error || "unknown"));
-      }
+    if (!response.ok) {
+      const errorText = await response.text(); // HTML 에러를 방지
+      throw new Error("Server Error: " + errorText.slice(0, 100));
     }
+
+    const data = await response.json();
+    if (data.audio_url) {
+      document.getElementById("player").innerHTML = `
+        <audio controls autoplay>
+          <source src="https://jamesinjic.onrender.com${data.audio_url}" type="audio/mpeg">
+          Your browser does not support the audio element.
+        </audio>
+      `;
+    } else {
+      alert("Error: " + (data.error || "unknown"));
+    }
+  } catch (err) {
+    console.error("Fetch failed:", err);
+    alert("Failed to contact server.\n" + err.message);
+  }
+}
 
     function resetAll() {
       document.getElementById("textInput").value = "";
