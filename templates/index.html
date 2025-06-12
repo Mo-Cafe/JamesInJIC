@@ -13,6 +13,15 @@
       background-color: #f9f9f9;
     }
 
+    img.logo {
+      width: 80px;
+      height: 80px;
+      opacity: 0.3;
+      display: block;
+      margin: 0 auto 20px auto;
+      cursor: pointer;
+    }
+
     h1 {
       font-size: 1.8em;
       margin-bottom: 30px;
@@ -54,21 +63,26 @@
       margin-top: 60px;
       color: gray;
       font-size: 0.9em;
+      line-height: 1.6;
     }
   </style>
 </head>
 <body>
-  <img src="/logo.png" alt="Logo"
-       style="width: 80px; height: 80px; opacity: 0.3; display: block; margin: 0 auto 20px auto;">
+  <!-- 로고 이미지 (클릭 시 입력 초기화) -->
+  <img src="/static/logo.png" alt="Logo" class="logo" onclick="resetAll()">
+
   <h1>How do you pronounce this?</h1>
 
-  <input id="textInput" type="text" placeholder="Enter English text">
+  <input id="textInput" type="text" placeholder="Enter English text" onkeydown="handleEnter(event)">
   <br>
-  <button onclick="speakText()">Say it!</button>
+  <button onclick="speakText()">▶ Say it!</button>
 
   <div id="player"></div>
 
-  <footer>© Copyright. James Oh. All rights reserved. And Thanks to Peter, Gary, and Shuhei</footer>
+  <footer>
+    © Copyright. James Oh. All Rights Reserved.<br>
+    And Thanks to Peter, Gary, and Shuhei.
+  </footer>
 
   <script>
     async function speakText() {
@@ -91,6 +105,17 @@
         `;
       } else {
         alert("Error: " + (data.error || "unknown"));
+      }
+    }
+
+    function resetAll() {
+      document.getElementById("textInput").value = "";
+      document.getElementById("player").innerHTML = "";
+    }
+
+    function handleEnter(event) {
+      if (event.key === "Enter") {
+        speakText();
       }
     }
   </script>
